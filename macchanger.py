@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import optparse
 import subprocess
+import re
 
 def get_args():
     # Create parser object
@@ -21,6 +22,12 @@ def get_args():
 
     return options
 
+def get_current_mac(interface):
+    ifconfig_result = subprocess.check_output(["ifconfig",interface])
+    current_mac_find = re.search(r"(\w{2}:){5}\w{2}",str(ifconfig_result))
+    current_mac = current_mac_find.group(0)
+    return current_mac
+
 def change_mac(interface, new_mac):
     print(f"[+] Changing MAC address for {interface} to {new_mac}")
 
@@ -30,6 +37,15 @@ def change_mac(interface, new_mac):
 
 
 args = get_args()
+
+current_mac = get_current_mac(args.interface)
+print(f"Current MAC : {current_mac}")
+
 change_mac(args.interface,args.new_mac)
+
+if current_mac == args.new_mac:
+    print(f"[+] MAC address sucessfully changed to {current_mac}.")
+else:
+    print(f"[-] MAC address was not updated.")
 
 
